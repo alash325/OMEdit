@@ -1333,6 +1333,7 @@ void OptionsDialog::addListItems()
   pTLMItem->setText(tr("TLM"));
   // Traceability Item
   QListWidgetItem *pTraceabilityItem = new QListWidgetItem(mpOptionsList);
+  pTraceabilityItem->setIcon(QIcon(":/Resources/icons/traceability.svg"));
   pTraceabilityItem->setText(tr("Traceability"));
 }
 
