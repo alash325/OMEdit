@@ -443,9 +443,15 @@ bool CompositeModelEditor::createConnection(LineAnnotation *pConnectionLineAnnot
     connection.setAttribute("From", pConnectionLineAnnotation->getStartComponentName());
     connection.setAttribute("To", pConnectionLineAnnotation->getEndComponentName());
     connection.setAttribute("Delay", pConnectionLineAnnotation->getDelay());
-    connection.setAttribute("alpha", pConnectionLineAnnotation->getAlpha());
-    connection.setAttribute("Zf", pConnectionLineAnnotation->getZf());
-    connection.setAttribute("Zfr", pConnectionLineAnnotation->getZfr());
+    if(!pConnectionLineAnnotation->getAlpha().isEmpty()) {
+      connection.setAttribute("alpha", pConnectionLineAnnotation->getAlpha());
+    }
+    if(!pConnectionLineAnnotation->getZf().isEmpty()) {
+      connection.setAttribute("Zf", pConnectionLineAnnotation->getZf());
+    }
+    if(!pConnectionLineAnnotation->getZfr().isEmpty()) {
+      connection.setAttribute("Zfr", pConnectionLineAnnotation->getZfr());
+    }
     // create Annotation Element
     QDomElement annotation = mXmlDocument.createElement("Annotation");
     annotation.setAttribute("Points", pConnectionLineAnnotation->getCompositeModelShapeAnnotation());
@@ -528,9 +534,15 @@ void CompositeModelEditor::updateConnection(LineAnnotation *pConnectionLineAnnot
     if (connection.attribute("From").compare(pConnectionLineAnnotation->getStartComponentName()) == 0 &&
         connection.attribute("To").compare(pConnectionLineAnnotation->getEndComponentName()) == 0) {
       connection.setAttribute("Delay", pConnectionLineAnnotation->getDelay());
-      connection.setAttribute("alpha", pConnectionLineAnnotation->getAlpha());
-      connection.setAttribute("Zf", pConnectionLineAnnotation->getZf());
-      connection.setAttribute("Zfr", pConnectionLineAnnotation->getZfr());
+      if(connection.hasAttribute("alpha")) {
+        connection.setAttribute("alpha", pConnectionLineAnnotation->getAlpha());
+      }
+      if(connection.hasAttribute("Zf")) {
+        connection.setAttribute("Zf", pConnectionLineAnnotation->getZf());
+      }
+      if(connection.hasAttribute("Zfr")) {
+        connection.setAttribute("Zfr", pConnectionLineAnnotation->getZfr());
+      }
       QDomNodeList connectionChildren = connection.childNodes();
       bool annotationFound = false;
       for (int j = 0 ; j < connectionChildren.size() ; j++) {
@@ -1243,12 +1255,20 @@ void CompositeModelEditor::showContextMenu(QPoint point)
  */
 void CompositeModelEditor::setPlainText(const QString &text)
 {
+  static int init = 0;
   if (text != mpPlainTextEdit->toPlainText()) {
     mForceSetPlainText = true;
     mXmlDocument.setContent(text);
     updateAllOrientations();
     // use the text from mXmlDocument so that we can map error to line numbers. We don't care about users formatting in the file.
-    mpPlainTextEdit->setPlainText(mXmlDocument.toString());
+    if (!init) {
+      init = 1;
+      mpPlainTextEdit->setPlainText(mXmlDocument.toString());
+    } else {
+      QTextCursor textCursor (mpPlainTextEdit->document());
+      textCursor.select(QTextCursor::Document);
+      textCursor.insertText(mXmlDocument.toString());
+    }
     mForceSetPlainText = false;
     mLastValidText = text;
   }
